@@ -448,6 +448,9 @@ RECOMMENDATIONS = {
 }
 }
 
+@app.route("/")
+def home():
+    return "🌱 EcoMist Flask API is running!"
 
 
 @app.route('/predict-v2', methods=['POST'])
