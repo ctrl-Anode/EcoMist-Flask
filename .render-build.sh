@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 
-# Force Render to use pip instead of Poetry
-echo "Disabling Poetry and using pip + requirements.txt"
+echo "Using pip install instead of Poetry"
 pip install -r requirements.txt
