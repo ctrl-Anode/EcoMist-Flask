@@ -8,6 +8,7 @@ import logging
 import firebase_admin
 from firebase_admin import messaging
 from firebase_admin import credentials, auth as firebase_auth, firestore
+from tensorflow import keras
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -41,7 +42,8 @@ CORS(app)  # Enable CORS for all routes
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 # Load the trained TensorFlow model
 try:
-    model = tf.keras.models.load_model("LettuceModelV2", compile=False)
+    #model = tf.keras.models.load_model("LettuceModelV2", compile=False)
+    model = keras.models.load_model("LettuceModelV2.keras")
     logger.info("✅ Model loaded successfully!")
 except Exception as e:
     logger.error(f"❌ Error loading model: {e}")
