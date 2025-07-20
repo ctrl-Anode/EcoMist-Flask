@@ -24,7 +24,7 @@ load_dotenv()
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-
+modelv2 = None  # Global model variable
 cred = credentials.Certificate(os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
 firebase_admin.initialize_app(cred)
 db = firestore.client()
@@ -40,14 +40,14 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
-# Load the trained TensorFlow model
-try:
-    #model = tf.keras.models.load_model("LettuceModelV2", compile=False)
-    model = keras.models.load_model("LettuceModelV2.keras")
-    logger.info("✅ Model loaded successfully!")
-except Exception as e:
-    logger.error(f"❌ Error loading model: {e}")
-    model = None
+
+def load_model_once():
+    global modelv2
+    if modelv2 is None:
+        modelv2 = keras.models.load_model("LettuceModelV2.keras")
+        logger.info("✅ Model loaded (lazy load)")
+
+
 
 # Define class labels and recommendations
 CLASS_LABELS = ["Bacterial", "Fungal", "Healthy", "Cant Classified"]
@@ -455,10 +455,12 @@ def home():
 
 @app.route('/predict-v2', methods=['POST'])
 def predict():
-    if model is None:
-        return jsonify({"error": "Model failed to load"}), 500
-
+    
     try:
+        load_model_once()  # ⬅️ Load only if not yet loaded
+        if modelv2 is None:
+            return jsonify({"error": "Model failed to load"}), 500
+        
         # ✅ Authenticate Firebase user
         decoded_user = verify_token(request)
         uid = decoded_user['uid']
@@ -474,7 +476,7 @@ def predict():
         img_array = np.array(image) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
 
-        predictions = model.predict(img_array)
+        predictions = modelv2.predict(img_array)
 
         # 🧠 Fallback logic using "Cant Classified" (Lettuce) class
         MIN_CONFIDENCE = 0.50
@@ -519,7 +521,7 @@ def predict():
 def health_check():
     return jsonify({
         "status": "healthy",
-        "model_loaded": model is not None
+        "model_loaded": modelv2 is not None
     })
 
 @app.route('/model-info-v2', methods=['GET'])
