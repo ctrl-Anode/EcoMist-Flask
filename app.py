@@ -38,7 +38,13 @@ logger = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, resources={r"/*": {
+  "origins": [
+    "http://localhost:5173",
+    "https://ecomist-rosy.vercel.app"
+  ]
+}}, supports_credentials=True)
+
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 def load_model_once():
