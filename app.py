@@ -55,7 +55,6 @@ def load_model_once():
         logger.info("✅ Model loaded (lazy load)")
 
 
-
 # Define class labels and recommendations
 CLASS_LABELS = ["Bacterial", "Fungal", "Healthy", "Cant Classified"]
 
@@ -947,5 +946,6 @@ def predict_compare():
 
 # Main entry point
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    port = int(os.getenv("PORT", 5000)) 
+    app.run(host="0.0.0.0", port=port)
 #CORS(app, origins=["http://localhost:5173"])  # or your production URL  
